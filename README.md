@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="frontend/public/icon.svg" alt="KleinKauf" width="96" height="96">
+</p>
+
 # KleinKauf
 
 Free management software for small businesses (furniture and home decor shops, for example): an online store with
@@ -59,11 +63,7 @@ The interface is in Spanish (the target market is Argentina); code and documenta
 
 ## Architecture
 
-```
-   Browser ──▶ Frontend (Vite + React) ──▶ Gateway (Spring Cloud Gateway) ──▶ users · products · sales · observability
-                                                     │                                   │
-                                                   Redis                        PostgreSQL (schema per store)
-```
+<p align="center"><img src="docs/diagrams/architecture.svg" alt="Architecture: browser, frontend, gateway, services and databases"></p>
 
 Java 21 and Spring Boot microservices behind a single gateway, service discovery with Eureka, PostgreSQL with one
 schema per store, Redis for caching, rate limiting and events, and a React + TypeScript single-page app. Details in
@@ -100,3 +100,4 @@ Everything else (running without Docker, tests, the end-to-end check) is in
 | [Observability](docs/features/observability.md) · [Audit log](docs/features/audit.md) | Health, metrics, traces, logs, live panels and auditing |
 | [Deployment](docs/deployment.md) · [Email](docs/mail.md) | Server setup, operations and Resend |
 | [Style reference](docs/style-reference.md) | The visual style the frontend follows |
+| [Next features](docs/next-features.md) · [Server tasks](docs/server-tasks.md) | What is still to be built, and pending server work and technical debt |
