@@ -5,6 +5,7 @@ import com.kleinkauf.common.servlet.tenant.TenantSchemaManager;
 import com.kleinkauf.common.dto.TenantDto;
 import com.kleinkauf.product.services.UserService;
 import jakarta.annotation.PostConstruct;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
@@ -22,6 +23,7 @@ import java.util.List;
 /*
 In charge of defining the connection pool of all the dbs
  */
+@Slf4j
 @Component
 public class TenantDataSource implements Serializable, TenantSchemaManager {
 
@@ -41,6 +43,8 @@ public class TenantDataSource implements Serializable, TenantSchemaManager {
                     createSchemaIfNotExists(tenant.schema());
                 runMigration(tenant.schema());
             }
+        } else {
+            log.warn("No tenants at startup: schemas will be migrated on their first request");
         }
     }
 
@@ -67,10 +71,17 @@ public class TenantDataSource implements Serializable, TenantSchemaManager {
         runMigration(name);
     }
 
+    /*
+    Called once per schema and process by DatabaseMultiTenantConnectionProvider. It also migrates schemas that already
+    exist: if the startup migration was skipped (users was not reachable and the tenant list came back empty),
+    the first request of the store repairs it instead of failing with missing columns.
+     */
     @Override
     public void prepareSchema(String tenantIdentifier) {
         if (!existsSchema(tenantIdentifier)) {
             createSchema(tenantIdentifier);
+        } else {
+            runMigration(tenantIdentifier);
         }
     }
 
