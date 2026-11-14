@@ -72,14 +72,14 @@ class StoreSettingsServiceTest {
         StoreSettings settings = new StoreSettings();
         when(repository.findById(StoreSettings.SINGLETON_ID)).thenReturn(Optional.of(settings));
 
-        StoreDto store = service.update(new UpdateStoreDto("  Casa Roble  ", "forest", false, true, null));
+        StoreDto store = service.update(new UpdateStoreDto("  Casa Roble  ", "forest", false, true, null, null));
         assertEquals("Casa Roble", store.name());
         assertEquals("Casa Roble", store.customName());
         assertEquals("FOREST", store.theme());
         assertFalse(store.showIconInHeader());
         assertTrue(store.showIconAsFavicon());
 
-        store = service.update(new UpdateStoreDto("   ", null, null, null, null));
+        store = service.update(new UpdateStoreDto("   ", null, null, null, null, null));
         assertEquals("Mi tienda", store.name());
         assertNull(store.customName());
         assertEquals("FOREST", store.theme(), "a null theme keeps the current one");
@@ -91,11 +91,11 @@ class StoreSettingsServiceTest {
         lenient().when(repository.findById(StoreSettings.SINGLETON_ID)).thenReturn(Optional.of(new StoreSettings()));
 
         ApiException longName = assertThrows(ApiException.class,
-                () -> service.update(new UpdateStoreDto("x".repeat(61), null, null, null, null)));
+                () -> service.update(new UpdateStoreDto("x".repeat(61), null, null, null, null, null)));
         assertEquals(HttpStatus.BAD_REQUEST, longName.getStatus());
 
         ApiException theme = assertThrows(ApiException.class,
-                () -> service.update(new UpdateStoreDto("Casa", "neon", null, null, null)));
+                () -> service.update(new UpdateStoreDto("Casa", "neon", null, null, null, null)));
         assertEquals(HttpStatus.BAD_REQUEST, theme.getStatus());
         verify(repository, never()).saveAndFlush(any());
     }
@@ -107,14 +107,14 @@ class StoreSettingsServiceTest {
         when(repository.findById(StoreSettings.SINGLETON_ID)).thenReturn(Optional.of(settings));
 
         StoreDto store = service.update(new UpdateStoreDto("Casa", null, null, null,
-                new SocialLinks("@casa.roble", "https://twitter.com/casaroble", null, "casaroble")));
+                new SocialLinks("@casa.roble", "https://twitter.com/casaroble", null, "casaroble"), null));
 
         assertEquals("https://www.instagram.com/casa.roble", store.socials().instagram());
         assertEquals("https://twitter.com/casaroble", store.socials().x());
         assertEquals("https://www.facebook.com/casaroble", store.socials().facebook(), "a null network keeps its link");
         assertEquals("https://www.tiktok.com/@casaroble", store.socials().tiktok());
 
-        store = service.update(new UpdateStoreDto("Casa", null, null, null, new SocialLinks(" ", null, "", null)));
+        store = service.update(new UpdateStoreDto("Casa", null, null, null, new SocialLinks(" ", null, "", null), null));
         assertNull(store.socials().instagram(), "a blank network is removed");
         assertNull(store.socials().facebook());
         assertEquals("https://www.tiktok.com/@casaroble", store.socials().tiktok());
@@ -131,10 +131,30 @@ class StoreSettingsServiceTest {
                 new SocialLinks(null, null, "javascript:alert(1)", null),
                 new SocialLinks(null, null, null, "https://user:pass@tiktok.com/@casa"))) {
             ApiException ex = assertThrows(ApiException.class,
-                    () -> service.update(new UpdateStoreDto("Casa", null, null, null, socials)));
+                    () -> service.update(new UpdateStoreDto("Casa", null, null, null, socials, null)));
             assertEquals(HttpStatus.BAD_REQUEST, ex.getStatus());
         }
         verify(repository, never()).saveAndFlush(any());
+    }
+
+    @Test
+    void update_whatsapp_storesDigitsKeepsNullRemovesBlankAndRejectsInvalid() throws ApiException {
+        StoreSettings settings = new StoreSettings();
+        when(repository.findById(StoreSettings.SINGLETON_ID)).thenReturn(Optional.of(settings));
+
+        StoreDto store = service.update(new UpdateStoreDto("Casa", null, null, null, null, "+54 9 11 1234-5678"));
+        assertEquals("5491112345678", store.whatsapp());
+
+        store = service.update(new UpdateStoreDto("Casa", null, null, null, null, null));
+        assertEquals("5491112345678", store.whatsapp(), "a null number keeps the current one");
+
+        ApiException invalid = assertThrows(ApiException.class,
+                () -> service.update(new UpdateStoreDto("Casa", null, null, null, null, "011 1234")));
+        assertEquals(HttpStatus.BAD_REQUEST, invalid.getStatus());
+        assertEquals("5491112345678", settings.getWhatsapp(), "an invalid number does not change anything");
+
+        store = service.update(new UpdateStoreDto("Casa", null, null, null, null, "  "));
+        assertNull(store.whatsapp(), "a blank number removes it");
     }
 
     @Test
@@ -150,7 +170,7 @@ class StoreSettingsServiceTest {
     void update_acceptsDarkTheme() throws ApiException {
         when(repository.findById(StoreSettings.SINGLETON_ID)).thenReturn(Optional.of(new StoreSettings()));
 
-        assertEquals("NIGHT", service.update(new UpdateStoreDto(null, "night", null, null, null)).theme());
+        assertEquals("NIGHT", service.update(new UpdateStoreDto(null, "night", null, null, null, null)).theme());
     }
 
     @Test
@@ -205,7 +225,7 @@ class StoreSettingsServiceTest {
                 .thenThrow(new DataIntegrityViolationException("duplicate key"))
                 .thenAnswer(invocation -> invocation.getArgument(0));
 
-        StoreDto store = service.update(new UpdateStoreDto("Casa Roble", "rose", null, null, null));
+        StoreDto store = service.update(new UpdateStoreDto("Casa Roble", "rose", null, null, null, null));
 
         assertEquals("Casa Roble", store.name());
         assertEquals("ROSE", store.theme());

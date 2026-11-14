@@ -13,6 +13,7 @@ import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
 import { OrderLookupForm } from "@/components/order-lookup-form"
 import { OrderStatusBadge } from "@/components/order-status-badge"
+import { WhatsAppAskButton } from "@/components/whatsapp"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import {
@@ -115,6 +116,7 @@ function OrderDetail({ order, email, justCreated }: { order: Order; email: strin
           {order.status === "CANCELADO" && lastReason("CANCELADO") ? (
             <p className="text-sm text-muted-foreground">{strings.order.cancelledReason(lastReason("CANCELADO")!)}</p>
           ) : null}
+          <WhatsAppAskButton label={strings.whatsapp.askOrder} message={strings.whatsapp.orderMessage(order.number)} />
         </div>
 
         {order.payment ? <PaymentCard order={order} payment={order.payment} email={email} /> : null}

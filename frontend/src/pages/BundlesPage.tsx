@@ -5,6 +5,7 @@ import { CATALOG_PATH } from "@/lib/catalog-url"
 import { useCatalogBundles } from "@/api/catalog"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
+import { WhatsAppFloatingButton } from "@/components/whatsapp"
 import { PageHeader } from "@/components/page-header"
 import { BundleCard } from "@/components/catalog-highlights"
 import { Button } from "@/components/ui/button"
@@ -50,6 +51,7 @@ export default function BundlesPage() {
         )}
       </main>
       <Footer />
+      <WhatsAppFloatingButton />
     </div>
   )
 }

@@ -13,6 +13,11 @@ export function productShareUrl(slug: string): string {
   return `${window.location.origin}/productos/${encodeURIComponent(slug)}`
 }
 
+// Chat with the store's number (international format, digits only) with the message already written
+export function whatsappChatUrl(number: string, text: string): string {
+  return `https://wa.me/${number}?text=${encodeURIComponent(text)}`
+}
+
 export function whatsappShareUrl(text: string, url: string): string {
   return `https://wa.me/?text=${encodeURIComponent(`${text} ${url}`)}`
 }
