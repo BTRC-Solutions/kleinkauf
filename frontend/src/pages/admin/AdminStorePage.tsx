@@ -17,6 +17,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
 import { SOCIAL_NETWORKS, type SocialNetwork } from "@/components/social-links"
+import { WhatsAppIcon } from "@/components/whatsapp"
 import type { SocialLinks } from "@/lib/types"
 
 const MAX_NAME = 60
@@ -25,7 +26,7 @@ const ICON_TYPES = ["image/png", "image/jpeg", "image/webp", "image/gif"]
 
 const t = strings.adminStore
 
-// Store settings (/admin/store, ADMINISTRADOR only): name, color theme, icon and social networks. The theme previews
+// Store settings (/admin/store, ADMINISTRADOR only): name, color theme, icon, social networks and WhatsApp. The theme previews
 // on the whole page while choosing; leaving without saving restores the saved one. The icon is saved on upload
 
 const EMPTY_SOCIALS: Record<SocialNetwork, string> = { instagram: "", x: "", facebook: "", tiktok: "" }
@@ -36,6 +37,10 @@ const savedSocials = (socials: SocialLinks | undefined): Record<SocialNetwork, s
   facebook: socials?.facebook ?? "",
   tiktok: socials?.tiktok ?? "",
 })
+
+// The backend stores the digits without "+": it is shown with it, like it is typed
+const savedWhatsapp = (whatsapp: string | null | undefined) => (whatsapp ? `+${whatsapp}` : "")
+
 export default function AdminStorePage() {
   const config = useStoreConfig()
   const update = useUpdateStoreConfig()
@@ -48,6 +53,7 @@ export default function AdminStorePage() {
   const [showIconInHeader, setShowIconInHeader] = useState(true)
   const [showIconAsFavicon, setShowIconAsFavicon] = useState(true)
   const [socials, setSocials] = useState<Record<SocialNetwork, string>>(EMPTY_SOCIALS)
+  const [whatsapp, setWhatsapp] = useState("")
   const [error, setError] = useState<string | null>(null)
 
   const saved = config.data
@@ -59,6 +65,7 @@ export default function AdminStorePage() {
     setShowIconAsFavicon(saved.showIconAsFavicon)
     // The backend returns the full link (also when only the user was typed)
     setSocials(savedSocials(saved.socials))
+    setWhatsapp(savedWhatsapp(saved.whatsapp))
   }, [saved])
 
   // Theme preview on the whole page. Leaving restores the saved one
@@ -83,7 +90,8 @@ export default function AdminStorePage() {
     theme !== saved.theme ||
     showIconInHeader !== saved.showIconInHeader ||
     showIconAsFavicon !== saved.showIconAsFavicon ||
-    SOCIAL_NETWORKS.some(({ key }) => socials[key].trim() !== savedSocials(saved.socials)[key])
+    SOCIAL_NETWORKS.some(({ key }) => socials[key].trim() !== savedSocials(saved.socials)[key]) ||
+    whatsapp.trim() !== savedWhatsapp(saved.whatsapp)
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault()
@@ -97,14 +105,22 @@ export default function AdminStorePage() {
       const trimmed = Object.fromEntries(
         SOCIAL_NETWORKS.map(({ key }) => [key, socials[key].trim()])
       ) as Record<SocialNetwork, string>
-      await update.mutateAsync({ name: clean || null, theme, showIconInHeader, showIconAsFavicon, socials: trimmed })
+      await update.mutateAsync({
+        name: clean || null,
+        theme,
+        showIconInHeader,
+        showIconAsFavicon,
+        socials: trimmed,
+        whatsapp: whatsapp.trim(),
+      })
       toast.success(t.saved)
     } catch (err) {
-      // 400 with "The <network> link is not valid": the backend says which network
-      const network = axios.isAxiosError(err) && err.response?.status === 400
-        ? SOCIAL_NETWORKS.find(({ label }) => String(err.response?.data ?? "").includes(`The ${label} link`))
-        : undefined
-      setError(network ? t.socialInvalid(network.label) : getErrorMessage(err, t.saveError))
+      // 400 with "The <network> link is not valid" or "The WhatsApp number": the backend says which field
+      const message = axios.isAxiosError(err) && err.response?.status === 400 ? String(err.response?.data ?? "") : ""
+      const network = SOCIAL_NETWORKS.find(({ label }) => message.includes(`The ${label} link`))
+      if (network) setError(t.socialInvalid(network.label))
+      else if (message.includes("The WhatsApp number")) setError(t.whatsappInvalid)
+      else setError(getErrorMessage(err, t.saveError))
     }
   }
 
@@ -281,6 +297,31 @@ export default function AdminStorePage() {
               </div>
             ))}
             <p className="text-xs text-muted-foreground">{t.socialsHint}</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>{t.whatsappTitle}</CardTitle>
+            <CardDescription>{t.whatsappDescription}</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-1.5">
+            <Label htmlFor="store-whatsapp" className="flex items-center gap-2">
+              <WhatsAppIcon className="h-4 w-4" />
+              {t.whatsappLabel}
+            </Label>
+            <Input
+              id="store-whatsapp"
+              type="tel"
+              inputMode="tel"
+              autoComplete="tel"
+              value={whatsapp}
+              maxLength={30}
+              placeholder={t.whatsappPlaceholder}
+              onChange={(event) => setWhatsapp(event.target.value)}
+              className="max-w-md"
+            />
+            <p className="text-xs text-muted-foreground">{t.whatsappHint}</p>
           </CardContent>
         </Card>
 

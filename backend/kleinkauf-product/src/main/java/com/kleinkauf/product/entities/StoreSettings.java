@@ -9,7 +9,7 @@ import org.hibernate.annotations.ColumnDefault;
 
 import java.time.LocalDateTime;
 
-// Store settings (name, color theme, icon and social networks): a single row per schema
+// Store settings (name, color theme, icon, social networks and WhatsApp): a single row per schema
 @Entity
 @Audited
 @Table(name = "store_settings")
@@ -59,6 +59,11 @@ public class StoreSettings {
 
     @Column(name = "tiktok_url", length = 255)
     private String tiktokUrl;
+
+    // WhatsApp number for customers to write to the store (international format, digits only, see WhatsappNumber).
+    // null: the storefront does not show the WhatsApp buttons
+    @Column(name = "whatsapp", length = 15)
+    private String whatsapp;
 
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;

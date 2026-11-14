@@ -12,6 +12,7 @@ import com.kleinkauf.product.repositories.StoreSettingsRepository;
 import com.kleinkauf.product.util.FileManager;
 import com.kleinkauf.product.util.SocialLinkNormalizer;
 import com.kleinkauf.product.util.SocialLinkNormalizer.Network;
+import com.kleinkauf.product.util.WhatsappNumber;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
@@ -27,8 +28,8 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
 /*
-Store settings: name, color theme, icon (and whether the icon goes in the header and as the favicon) and social
-networks.
+Store settings: name, color theme, icon (and whether the icon goes in the header and as the favicon), social
+networks and the WhatsApp number.
 Until the administrator changes them the defaults apply: the name derived from the store identifier, the OCEAN
 theme and no icon. The icon is stored and served like product images.
  */
@@ -59,6 +60,7 @@ public class StoreSettingsService {
         String x = socials == null ? null : social(Network.X, "X", socials.x());
         String facebook = socials == null ? null : social(Network.FACEBOOK, "Facebook", socials.facebook());
         String tiktok = socials == null ? null : social(Network.TIKTOK, "TikTok", socials.tiktok());
+        String whatsapp = whatsapp(dto.whatsapp());
         return toDto(save(settings -> {
             if (theme != null) settings.setTheme(theme.name());
             settings.setName(name);
@@ -70,6 +72,7 @@ public class StoreSettingsService {
                 if (socials.facebook() != null) settings.setFacebookUrl(facebook);
                 if (socials.tiktok() != null) settings.setTiktokUrl(tiktok);
             }
+            if (dto.whatsapp() != null) settings.setWhatsapp(whatsapp);
         }));
     }
 
@@ -83,6 +86,18 @@ public class StoreSettingsService {
             throw new ApiException(ErrorMessages.INVALID_SOCIAL_LINK.formatted(label), HttpStatus.BAD_REQUEST);
         }
         return link;
+    }
+
+    // The number in international format, or null if blank (removes it). 400 if it is not a phone number
+    private static String whatsapp(String value) throws ApiException {
+        if (value == null || value.isBlank()) {
+            return null;
+        }
+        String number = WhatsappNumber.normalize(value);
+        if (number == null) {
+            throw new ApiException(ErrorMessages.INVALID_WHATSAPP, HttpStatus.BAD_REQUEST);
+        }
+        return number;
     }
 
     // Replaces the icon (the previous file is deleted from disk). Same rules as product images: up to 1 MB and JPG,
@@ -164,7 +179,8 @@ public class StoreSettingsService {
         String name = s.getName() != null ? s.getName() : defaultName(TenantContext.getCurrentTenant());
         return new StoreDto(name, s.getName(), knownTheme(s.getTheme()).name(), s.getIcon(),
                 s.isShowIconInHeader(), s.isShowIconAsFavicon(),
-                new SocialLinks(s.getInstagramUrl(), s.getXUrl(), s.getFacebookUrl(), s.getTiktokUrl()));
+                new SocialLinks(s.getInstagramUrl(), s.getXUrl(), s.getFacebookUrl(), s.getTiktokUrl()),
+                s.getWhatsapp());
     }
 
     // A theme that no longer exists (or a value set by hand) is shown as the default one
