@@ -3,6 +3,8 @@ import type { CatalogProduct, ProductMetadata } from "@/lib/types"
 import { strings } from "@/lib/strings"
 import { formatPrice } from "@/lib/utils"
 import { ShareButtons } from "@/components/share-buttons"
+import { WhatsAppAskButton } from "@/components/whatsapp"
+import { productShareUrl } from "@/lib/share"
 import { AddToCartButton } from "@/components/add-to-cart-button"
 import { Package, Check, ChevronLeft, ChevronRight } from "lucide-react"
 
@@ -143,6 +145,10 @@ export function ProductDetail({
           ) : null}
 
           <div className="space-y-2">
+            <WhatsAppAskButton
+              label={strings.whatsapp.askProduct}
+              message={strings.whatsapp.productMessage(product.name, productShareUrl(product.slug))}
+            />
             <ShareButtons slug={product.slug} name={product.name} />
             {extra}
           </div>

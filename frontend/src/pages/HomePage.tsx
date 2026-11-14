@@ -1,4 +1,5 @@
 import { Footer } from "@/components/footer"
+import { WhatsAppFloatingButton } from "@/components/whatsapp"
 import { Header } from "@/components/header"
 import { BundlesStrip, CatalogStrip, FeaturedStrip } from "@/components/catalog-highlights"
 import { usePageMeta } from "@/lib/page-meta"
@@ -17,6 +18,7 @@ export default function HomePage() {
       </main>
 
       <Footer />
+      <WhatsAppFloatingButton />
     </div>
   )
 }

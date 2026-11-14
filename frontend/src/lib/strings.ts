@@ -183,6 +183,14 @@ export const strings = {
     copyError: "No se pudo copiar el link.",
     message: (name: string) => `Mira ${name}:`,
   },
+  whatsapp: {
+    chatWith: (store: string) => `Escribile a ${store} por WhatsApp`,
+    storeMessage: (store: string) => `¡Hola ${store}! Tengo una consulta.`,
+    askProduct: "Consultar por WhatsApp",
+    productMessage: (name: string, url: string) => `¡Hola! Quería consultar por ${name}: ${url}`,
+    askOrder: "Consultar por WhatsApp",
+    orderMessage: (number: string) => `¡Hola! Quería hacer una consulta sobre mi pedido ${number}.`,
+  },
   productPage: {
     back: "Volver al catálogo",
     backPrevious: "Volver",
@@ -1342,6 +1350,13 @@ export const strings = {
     socialPlaceholder: "@tu_tienda o el link del perfil",
     socialsHint: "Podés poner solo el usuario o pegar el link de tu perfil. Dejalo vacío para que no aparezca.",
     socialInvalid: (network: string) => `El link de ${network} no es válido: poné el link de tu perfil o solo el usuario.`,
+    whatsappTitle: "WhatsApp",
+    whatsappDescription:
+      "Si lo completás, tus clientes pueden escribirte desde la tienda: un botón en las páginas principales, otro en cada producto y otro en sus pedidos.",
+    whatsappLabel: "Número",
+    whatsappPlaceholder: "+54 9 11 1234 5678",
+    whatsappHint: "Con el código de país y de área, sin el 0 ni el 15. Dejalo vacío para que no aparezca.",
+    whatsappInvalid: "El número de WhatsApp no es válido: ponelo completo, con el código de país (ej. +54 9 11 1234 5678).",
   },
   salesSettings: {
     title: "Datos de cobro",
