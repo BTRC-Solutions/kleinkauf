@@ -45,8 +45,8 @@ are `noindex`, and each store has its own `robots.txt` and `sitemap.xml` (see [d
   it. The superadmin has no `/auth/me`, so the platform keeps the user in `localStorage` (`platform_user`).
 - **Route guards** (`components/route-guards.tsx`): `RequireAuth`, `RequireRole`, `RequireArea` and
   `RequireSuperadmin`. The UI hides what the user cannot use; the backend validates anyway.
-- **Store branding**: name, one of 7 color themes (6 light and the dark "Noche"), icon and social links come from
-  `GET /api/v1/catalog/store`. `lib/store-themes.ts` overrides the CSS variables of `index.css` and remembers the theme
+- **Store branding**: name, one of 7 color themes (6 light and the dark "Noche"), icon, social links and WhatsApp number come
+  from `GET /api/v1/catalog/store`. `lib/store-themes.ts` overrides the CSS variables of `index.css` and remembers the theme
   in the browser so the page does not start with other colors.
 - **Texts** are Spanish and centralized in `lib/strings.ts`; currency in pesos, local dates.
 - **Real time**: `hooks/use-live-channels.ts` is the WebSocket client (single-use ticket, ping every 30 s, reconnect
@@ -85,11 +85,16 @@ are `noindex`, and each store has its own `robots.txt` and `sitemap.xml` (see [d
 | `/admin/reports` | `ADMINISTRADOR` | Sales reports by period, channel and payment method, with product ranking |
 | `/admin/actividad` | `ADMINISTRADOR` | Live activity, today's usage and connected users |
 | `/admin/auditoria` | `ADMINISTRADOR` | Store audit log with filters and CSV export |
-| `/admin/store` | `ADMINISTRADOR` | Store settings: name, theme, icon and social links |
+| `/admin/store` | `ADMINISTRADOR` | Store settings: name, theme, icon, social links and WhatsApp |
 | `/admin/products`, `/admin/bundles` | Any panel area | Products (stock movements, featured, CSV import/export, prices with `PRECIOS`) and bundles |
 | `/admin/users` | `USUARIOS` | Users, their roles and the permission matrix per role |
 
 The footer of every store page has the social links, a "report a problem" link and the legal pages.
+
+If the store set a WhatsApp number (`components/whatsapp.tsx`), customers can open a chat with it (`https://wa.me/`,
+with the message already written) from three places: a floating button on the home, catalog and bundles pages; a
+"Consultar por WhatsApp" button in the product detail (page and modal), with the product name and link; and the same
+button on the order page, with the order number.
 
 ## Running and building
 

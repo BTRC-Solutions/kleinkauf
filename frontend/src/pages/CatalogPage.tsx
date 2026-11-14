@@ -1,6 +1,7 @@
 import { strings } from "@/lib/strings"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
+import { WhatsAppFloatingButton } from "@/components/whatsapp"
 import { PageHeader } from "@/components/page-header"
 import { ProductCatalog } from "@/components/product-catalog"
 import { usePageMeta } from "@/lib/page-meta"
@@ -20,6 +21,7 @@ export default function CatalogPage() {
         <ProductCatalog />
       </main>
       <Footer />
+      <WhatsAppFloatingButton />
     </div>
   )
 }

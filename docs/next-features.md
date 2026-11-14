@@ -29,7 +29,7 @@ debt are in [server-tasks.md](server-tasks.md).
 - Have a lawyer review the `/privacidad` and `/terminos` texts (`lib/strings.ts`, `legal`).
 
 ### B12. Per-store settings
-- Configurable store texts (name, theme, icon and social links are already done).
+- Configurable store texts (name, theme, icon, social links and WhatsApp are already done).
 - Let each visitor choose light or dark (today the store decides it with the "Noche" theme).
 - Configurable emails per store.
 - Profile pictures for superadmins.

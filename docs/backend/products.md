@@ -17,7 +17,7 @@ Shared conventions (headers, errors, pagination, dates): [README](README.md). Pe
 - **CSV import and export** of products.
 - **Public catalog** (no login): paginated products with search, featured, detail by slug, categories and bundles. It
   shows availability, not exact stock. Cached in Redis.
-- **Store settings:** name, color theme, icon and social links.
+- **Store settings:** name, color theme, icon, social links and WhatsApp number.
 - **Store panel:** products and stock summary.
 - **For sales:** reserves and returns order stock and counts units sold (idempotent internal endpoints).
 - **For the platform:** products and bundles per store.
@@ -345,7 +345,7 @@ Products and stock summary, always up to date. Each field is explained in
 
 ## Store settings
 
-The store's name, color theme, icon and social links. One row per schema (`store_settings`, fixed id). Until something
+The store's name, color theme, icon, social links and WhatsApp number. One row per schema (`store_settings`, fixed id). Until something
 is saved, the store uses the name derived from its identifier, the default theme and no icon.
 
 `StoreDto`:
@@ -353,7 +353,8 @@ is saved, the store uses the name derived from its identifier, the default theme
 ```json
 { "name": "Lucía Deco", "customName": "Lucía Deco", "theme": "OCEAN", "icon": "9b1c..._1730.png",
   "showIconInHeader": true, "showIconAsFavicon": true,
-  "socials": { "instagram": "https://instagram.com/luciadeco", "x": null, "facebook": null, "tiktok": null } }
+  "socials": { "instagram": "https://instagram.com/luciadeco", "x": null, "facebook": null, "tiktok": null },
+  "whatsapp": "5491112345678" }
 ```
 
 - `name` is never `null`: without a custom name it is the one derived from the identifier; `customName` is what the
@@ -362,13 +363,15 @@ is saved, the store uses the name derived from its identifier, the default theme
   adding a theme does not need a migration.
 - `icon`: a file under `/products/images/`, or `null`.
 - `socials`: never `null`; each network is its profile link (always https) or `null`.
+- `whatsapp`: the number in international format, digits only and without `+` (what goes in `https://wa.me/<number>`),
+  or `null` if the store did not set one.
 
 ### GET /api/v1/catalog/store
 
 **Access:** Public
 
-The settings the storefront needs (`StoreDto`). The frontend applies the theme and the icon, and shows the social
-icons in the footer.
+The settings the storefront needs (`StoreDto`). The frontend applies the theme and the icon, shows the social
+icons in the footer and, with a WhatsApp number, the buttons to write to the store.
 
 ### GET /api/v1/store/settings
 
@@ -382,11 +385,13 @@ Same `StoreDto`, for the settings page.
 
 ```json
 { "name": "Lucía Deco", "theme": "FOREST", "showIconInHeader": true, "showIconAsFavicon": false,
-  "socials": { "instagram": "luciadeco", "tiktok": "" } }
+  "socials": { "instagram": "luciadeco", "tiktok": "" }, "whatsapp": "+54 9 11 1234-5678" }
 ```
 
 Fields left out or `null` do not change. For each social network: a profile link or just the username (products builds
-the link); only links of that network are accepted; `null` keeps the current one and `""` removes it. Response **200**:
+the link); only links of that network are accepted; `null` keeps the current one and `""` removes it. `whatsapp`: the number with the country code; spaces, dashes, dots,
+parentheses and the `+` are ignored and a `wa.me` link is accepted too; it must end up as 8 to 15 digits not starting
+with 0; `null` keeps it and `""` removes it. Response **200**:
 `StoreDto`. Invalid values answer 400.
 
 ### POST /api/v1/store/settings/icon · DELETE /api/v1/store/settings/icon
@@ -809,7 +814,7 @@ Without the internal token: 403 `Token invalido` (JSON with `status`, `error`, `
 | `bundles` | `id`, `name`, `enabled`, `price`, `pricing_type`, `discount`, `sold_count` | Hard delete |
 | `bundle_products` | `id`, `bundle_id`, `product_id`, `quantity` | |
 | `stock_reservations` | `id`, `reference` (unique), `status` (`RESERVED`/`RELEASED`), `sold`, `shortages`, `created_at`, `released_at` | Reservation idempotency |
-| `store_settings` | `id` (fixed), `name`, `theme` (text), `icon`, `show_icon_in_header`, `show_icon_as_favicon`, `instagram_url`, `x_url`, `facebook_url`, `tiktok_url`, `updated_at` | One row per schema |
+| `store_settings` | `id` (fixed), `name`, `theme` (text), `icon`, `show_icon_in_header`, `show_icon_as_favicon`, `instagram_url`, `x_url`, `facebook_url`, `tiktok_url`, `whatsapp`, `updated_at` | One row per schema |
 
 Images live on disk at `image.path` (`uploads/products/images`), outside any store.
 

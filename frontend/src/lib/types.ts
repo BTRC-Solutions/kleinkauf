@@ -416,6 +416,7 @@ export interface AdminOrderFilters {
 // name is never null (without a custom name it is derived from the identifier); customName is the one the admin set.
 // icon: file under /products/images/ or null
 // The store's social networks: the profile link of each one, or null if it does not have it
+// whatsapp: number in international format, digits only and without "+" (5491112345678), or null
 export interface SocialLinks {
   instagram: string | null
   x: string | null
@@ -431,15 +432,18 @@ export interface StoreConfig {
   showIconInHeader: boolean
   showIconAsFavicon: boolean
   socials: SocialLinks
+  whatsapp: string | null
 }
 
-// socials: what the administrator typed (the link or just the user); "" removes the network
+// socials: what the administrator typed (the link or just the user); "" removes the network.
+// whatsapp: the number as typed (the backend ignores spaces, dashes and "+"); "" removes it
 export interface UpdateStoreConfig {
   name: string | null
   theme: string
   showIconInHeader: boolean
   showIconAsFavicon: boolean
   socials: Record<keyof SocialLinks, string>
+  whatsapp: string
 }
 
 // Payment collection details. Empty ones are stored as null; expirationHours null = 48
