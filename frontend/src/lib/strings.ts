@@ -177,7 +177,7 @@ export const strings = {
   },
   share: {
     title: "Compartir",
-    whatsapp: "WhatsApp",
+    whatsapp: "Compartir en WhatsApp",
     copy: "Copiar link",
     copied: "Link copiado.",
     copyError: "No se pudo copiar el link.",
