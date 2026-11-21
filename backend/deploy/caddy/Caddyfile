@@ -132,3 +132,7 @@ http://localhost:5555 {
 	respond @tienda 200
 	respond 403
 }
+
+#Sitios de otros proyectos del server, uno por archivo en CADDY_SITES_DIR (montada en /etc/caddy-sites). Cada uno
+#tiene su propio host, asi que no choca con las tiendas. Si la carpeta esta vacia, Caddy solo lo avisa en el log
+import /etc/caddy-sites/*.caddy

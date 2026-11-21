@@ -236,9 +236,14 @@ services:
       PLATFORM_DOMAIN: ${PLATFORM_DOMAIN}
     volumes:
       - ./caddy:/etc/caddy:ro
+      #Sitios de otros proyectos del server (p. ej. careerly): cada uno deja su archivo .caddy en esta carpeta del host
+      - ${CADDY_SITES_DIR:-${HOME}/caddy-sites}:/etc/caddy-sites:ro
       #Certificados: si se pierden hay que volver a pedirlos y Let's Encrypt limita cuantos se emiten por semana
       - caddy-data:/data
       - caddy-config:/config
+    #edge: la red compartida con esos proyectos. Caddy solo ve los contenedores que ellos suman a edge, y ellos no ven
+    #nada de la red de kleinkauf (Postgres, Redis, los servicios)
+    networks: [default, edge]
     #Sin depends_on: el frontend lo despliega su rama (deploy/frontend); hasta que este, Caddy responde 502
 
   #Backup diario de Postgres y de las imagenes y comprobantes (backup/backup.sh). Todavia no esta activo: tiene su
@@ -290,6 +295,12 @@ services:
         condition: service_healthy
       product-service:
         condition: service_healthy
+
+#Red compartida con los otros proyectos del server que publica Caddy. Con nombre fijo para que la encuentren (en su
+#compose va como external). La crea este compose si no existe
+networks:
+  edge:
+    name: edge
 
 volumes:
   postgres-data:
