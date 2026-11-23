@@ -334,6 +334,26 @@ If Caddy cannot get certificates, first check that Let's Encrypt reaches port 80
 shows whether packets come in and get answered. After fixing it, `docker restart kleinkauf-caddy-1` makes it retry
 right away instead of waiting for its next attempt.
 
+## Other projects behind Caddy
+
+Caddy is the only entry on 80/443, so other projects on the server (for example careerly) are published through it
+too, without touching this repo for each one:
+
+- **Their site:** each project leaves a `<project>.caddy` file in `CADDY_SITES_DIR` (`~/caddy-sites` by default),
+  mounted read-only in `/etc/caddy-sites`. The Caddyfile imports every `*.caddy` in it. An empty folder only logs a
+  warning.
+- **Their network:** Caddy is also on the **`edge`** network, which this compose creates with that fixed name. A
+  project adds only the containers Caddy has to reach to `edge` (as an `external` network in its own compose). Caddy
+  reaches them by their alias on `edge`; they do not see kleinkauf's network (Postgres, Redis, the services).
+- **Their host:** a site must use its own host, outside `*.<domain>`: that namespace belongs to the stores, and a
+  site there would hide a store with the same identifier. With sslip.io, for example
+  `careerly-201-32-129-72.sslip.io`.
+- **After changing a site file:** `docker exec kleinkauf-caddy-1 caddy reload --config /etc/caddy/Caddyfile`. If the
+  file is wrong, Caddy keeps the previous configuration and the command fails with the error.
+
+Create the folder before the first deploy with this change, as the deploy user (`mkdir ~/caddy-sites`): if it does not
+exist, Docker creates it owned by root and the other projects cannot write to it.
+
 ## Moving from sslip.io to your own domain
 
 1. In the domain's DNS, create two A records pointing to the server IP: `domain.com` and `*.domain.com`.
@@ -350,7 +370,7 @@ Stores created before keep their URL with the old domain, so they need updating.
 | `backend/deploy/deploy.sh` | Script that runs on the server: build and start one part |
 | `backend/deploy/docker-compose.prod.yml` | Production compose |
 | `backend/deploy/Dockerfile.service` | Image for each backend service |
-| `backend/deploy/caddy/Caddyfile` | Caddy configuration |
+| `backend/deploy/caddy/Caddyfile` | Caddy configuration (imports the other projects' sites from `CADDY_SITES_DIR`) |
 | `backend/deploy/backup/backup.sh` | Daily backup |
 | `backend/deploy/.env.example` | Variables for the `.env` |
 | `frontend/Dockerfile`, `frontend/nginx.conf` | Frontend image (Vite build + nginx) |
